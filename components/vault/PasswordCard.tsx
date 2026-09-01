@@ -1,15 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Copy, Check, Trash2, ExternalLink } from "lucide-react";
-import { PasswordEntry, CATEGORY_STYLES } from "@/lib/types";
+import {
+  Eye,
+  EyeOff,
+  Copy,
+  Check,
+  Trash2,
+  ExternalLink,
+  Pencil,
+  Users,
+} from "lucide-react";
+import { PasswordEntry, CATEGORY_STYLES, TEAM_MEMBERS } from "@/lib/types";
 
 interface Props {
   entry: PasswordEntry;
   onDelete: (id: string) => void;
+  onEdit: (entry: PasswordEntry) => void;
+  onShare: (entry: PasswordEntry) => void;
 }
 
-export default function PasswordCard({ entry, onDelete }: Props) {
+export default function PasswordCard({ entry, onDelete, onEdit, onShare }: Props) {
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -24,6 +35,9 @@ export default function PasswordCard({ entry, onDelete }: Props) {
   };
 
   const initial = entry.site.charAt(0).toUpperCase();
+  const sharedMembers = (entry.sharedWith ?? [])
+    .map((id) => TEAM_MEMBERS.find((m) => m.id === id))
+    .filter((m): m is (typeof TEAM_MEMBERS)[number] => !!m);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4 card-hover group">
@@ -46,6 +60,24 @@ export default function PasswordCard({ entry, onDelete }: Props) {
           >
             {entry.category}
           </span>
+          {sharedMembers.length > 0 && (
+            <span className="flex items-center -space-x-1.5">
+              {sharedMembers.slice(0, 3).map((m) => (
+                <span
+                  key={m.id}
+                  title={m.name}
+                  className={`w-5 h-5 rounded-full bg-gradient-to-br ${m.color} border-2 border-white flex items-center justify-center text-[9px] font-bold text-white`}
+                >
+                  {m.name.charAt(0).toUpperCase()}
+                </span>
+              ))}
+              {sharedMembers.length > 3 && (
+                <span className="w-5 h-5 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[9px] font-bold text-gray-600">
+                  +{sharedMembers.length - 3}
+                </span>
+              )}
+            </span>
+          )}
         </div>
         <p className="text-xs text-gray-500 truncate">{entry.username}</p>
         <p className="text-xs font-mono text-gray-700 mt-0.5 tracking-wider">
@@ -98,6 +130,28 @@ export default function PasswordCard({ entry, onDelete }: Props) {
           ) : (
             <Copy className="w-4 h-4" />
           )}
+        </button>
+
+        {/* Share */}
+        <button
+          onClick={() => onShare(entry)}
+          className={`p-2 rounded-lg transition-colors ${
+            sharedMembers.length > 0
+              ? "bg-blue-100 text-blue-600"
+              : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          }`}
+          title="แชร์ภายในทีม"
+        >
+          <Users className="w-4 h-4" />
+        </button>
+
+        {/* Edit */}
+        <button
+          onClick={() => onEdit(entry)}
+          className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-violet-600 transition-colors"
+          title="แก้ไข"
+        >
+          <Pencil className="w-4 h-4" />
         </button>
 
         {/* Delete */}

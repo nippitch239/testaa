@@ -6,7 +6,7 @@ import { Eye, EyeOff, ShieldCheck, Lock } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // อีเมล หรือ ชื่อผู้ใช้
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ export default function LoginForm() {
     e.preventDefault();
     setError("");
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       setError("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
@@ -27,6 +27,8 @@ export default function LoginForm() {
 
     setLoading(true);
     // จำลอง auth — ตรงนี้ต่อ API จริงได้เลย
+    // identifier อาจเป็นอีเมล (มี "@") หรือชื่อผู้ใช้ก็ได้ ฝั่ง backend
+    // แค่ตรวจสอบรูปแบบแล้วค้นหาผู้ใช้จากคอลัมน์ที่ตรงกัน
     await new Promise((r) => setTimeout(r, 1200));
     setLoading(false);
     router.push("/vault");
@@ -105,17 +107,17 @@ export default function LoginForm() {
           {/* Form */}
           <div className="px-8 pb-10">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email */}
+              {/* Username or Email */}
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-gray-700">
-                  อีเมล
+                  อีเมล หรือ ชื่อผู้ใช้
                 </label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="กรอกอีเมลของคุณ"
-                  autoComplete="email"
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="กรอกอีเมลหรือชื่อผู้ใช้ของคุณ"
+                  autoComplete="username"
                   className="input-base"
                 />
               </div>

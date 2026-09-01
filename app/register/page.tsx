@@ -7,6 +7,7 @@ import { Eye, EyeOff, ShieldCheck, UserPlus } from "lucide-react";
 export default function RegisterForm() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,8 +21,12 @@ export default function RegisterForm() {
     e.preventDefault();
     setError("");
 
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !username || !email || !password || !confirmPassword) {
       setError("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.]{3,20}$/.test(username)) {
+      setError("ชื่อผู้ใช้ต้องมี 3-20 ตัวอักษร (a-z, 0-9, _ หรือ .)");
       return;
     }
     if (password.length < 6) {
@@ -128,6 +133,21 @@ export default function RegisterForm() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="กรอกชื่อของคุณ"
                   autoComplete="name"
+                  className="input-base"
+                />
+              </div>
+
+              {/* Username */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700">
+                  ชื่อผู้ใช้
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="ตั้งชื่อผู้ใช้สำหรับเข้าสู่ระบบ"
+                  autoComplete="username"
                   className="input-base"
                 />
               </div>

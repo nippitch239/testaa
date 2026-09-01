@@ -14,6 +14,7 @@ export interface PasswordEntry {
   category: Category;
   url: string;
   createdAt: Date;
+  sharedWith?: string[]; // TeamMember['id'][] — เพิ่มสำหรับฟีเจอร์แชร์ภายในทีม
 }
 
 export const CATEGORIES: Category[] = [
@@ -43,6 +44,7 @@ export const SAMPLE_PASSWORDS: PasswordEntry[] = [
     category: "Development",
     url: "github.com",
     createdAt: new Date(),
+    sharedWith: ["u1"],
   },
   {
     id: "2",
@@ -70,6 +72,7 @@ export const SAMPLE_PASSWORDS: PasswordEntry[] = [
     category: "Finance",
     url: "linebank.co.th",
     createdAt: new Date(),
+    sharedWith: ["u1", "u2"],
   },
   {
     id: "5",
@@ -80,4 +83,19 @@ export const SAMPLE_PASSWORDS: PasswordEntry[] = [
     url: "instagram.com",
     createdAt: new Date(),
   },
+];
+
+// ── สมาชิกทีม (สำหรับฟีเจอร์แชร์รหัสผ่านภายในทีม) ──
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  color: string; // tailwind gradient classes เช่น "from-pink-500 to-rose-500"
+}
+
+export const TEAM_MEMBERS: TeamMember[] = [
+  { id: "u1", name: "Nan", email: "nan@kmitl.ac.th", color: "from-pink-500 to-rose-500" },
+  { id: "u2", name: "Ploy", email: "ploy@kmitl.ac.th", color: "from-blue-500 to-cyan-500" },
+  { id: "u3", name: "Ken", email: "ken@kmitl.ac.th", color: "from-emerald-500 to-teal-500" },
+  { id: "u4", name: "Mind", email: "mind@kmitl.ac.th", color: "from-amber-500 to-orange-500" },
 ];

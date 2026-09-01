@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { X, Eye, EyeOff, RefreshCw, Plus } from "lucide-react";
+import { X, Eye, EyeOff, RefreshCw, Plus, Save } from "lucide-react";
 import { PasswordEntry, CATEGORIES, Category } from "@/lib/types";
 
 interface Props {
   onClose: () => void;
-  onAdd: (entry: Omit<PasswordEntry, "id" | "createdAt">) => void;
+  onSave: (entry: Omit<PasswordEntry, "id" | "createdAt">) => void;
+  /** ถ้าส่ง entry มา = โหมดแก้ไข, ถ้าไม่ส่ง = โหมดเพิ่มใหม่ */
+  entry?: PasswordEntry;
 }
 
 // สุ่ม password เบื้องต้น
@@ -18,13 +20,16 @@ function generatePassword(): string {
   ).join("");
 }
 
-export default function AddPasswordModal({ onClose, onAdd }: Props) {
+export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
+  const isEditMode = !!entry;
+
   const [form, setForm] = useState({
-    site: "",
-    url: "",
-    username: "",
-    password: "",
-    category: "Other" as Category,
+    site: entry?.site ?? "",
+    url: entry?.url ?? "",
+    username: entry?.username ?? "",
+    password: entry?.password ?? "",
+    category: (entry?.category ?? "Other") as Category,
+    sharedWith: entry?.sharedWith ?? ([] as string[]),
   });
   const [showPw, setShowPw] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -41,7 +46,7 @@ export default function AddPasswordModal({ onClose, onAdd }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    onAdd(form);
+    onSave(form);
   };
 
   const set = (key: string, value: string) => {
@@ -61,9 +66,15 @@ export default function AddPasswordModal({ onClose, onAdd }: Props) {
                 background: "linear-gradient(135deg, #7c3aed, #a855f7)",
               }}
             >
-              <Plus className="w-4 h-4 text-white" />
+              {isEditMode ? (
+                <Save className="w-4 h-4 text-white" />
+              ) : (
+                <Plus className="w-4 h-4 text-white" />
+              )}
             </div>
-            <h2 className="font-bold text-gray-900">เพิ่มรหัสผ่านใหม่</h2>
+            <h2 className="font-bold text-gray-900">
+              {isEditMode ? "แก้ไขรหัสผ่าน" : "เพิ่มรหัสผ่านใหม่"}
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -130,7 +141,7 @@ export default function AddPasswordModal({ onClose, onAdd }: Props) {
                 type={showPw ? "text" : "password"}
                 value={form.password}
                 onChange={(e) => set("password", e.target.value)}
-                placeholder="กรอกหรือสร้างรหัสผ่าน"
+                placeholder="กรอกหรือสุ่มรหัสผ่าน"
                 className={`input-base pr-20 ${errors.password ? "border-red-300 focus:border-red-400 focus:ring-red-100" : ""}`}
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -138,7 +149,7 @@ export default function AddPasswordModal({ onClose, onAdd }: Props) {
                   type="button"
                   onClick={() => set("password", generatePassword())}
                   className="p-1.5 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
-                  title="สร้างรหัสผ่านอัตโนมัติ"
+                  title="สุ่มรหัสผ่านอัตโนมัติ"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                 </button>
@@ -225,7 +236,7 @@ export default function AddPasswordModal({ onClose, onAdd }: Props) {
                 background: "linear-gradient(135deg, #7c3aed, #a855f7)",
               }}
             >
-              บันทึก
+              {isEditMode ? "บันทึกการแก้ไข" : "บันทึก"}
             </button>
           </div>
         </form>

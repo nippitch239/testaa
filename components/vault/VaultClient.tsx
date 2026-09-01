@@ -6,13 +6,18 @@ import { PasswordEntry, SAMPLE_PASSWORDS } from "@/lib/types";
 import VaultStats from "./VaultStats";
 import CategoryTabs from "./CategoryTabs";
 import PasswordCard from "./PasswordCard";
-import AddPasswordModal from "./AddPasswordModal";
+import PasswordFormModal from "./PasswordFormModal";
+import ShareModal from "./ShareModal";
 
 export default function VaultClient() {
   const [passwords, setPasswords] = useState<PasswordEntry[]>(SAMPLE_PASSWORDS);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  const [showModal, setShowModal] = useState(false);
+
+  // โหมดฟอร์ม: ปิด / เพิ่มใหม่ / แก้ไข (เก็บ entry ที่กำลังแก้)
+  const [formEntry, setFormEntry] = useState<PasswordEntry | "new" | null>(null);
+  // entry ที่กำลังเปิดหน้าต่างแชร์อยู่
+  const [shareEntry, setShareEntry] = useState<PasswordEntry | null>(null);
 
   const categories = useMemo(
     () => ["all", ...Array.from(new Set(passwords.map((p) => p.category)))],
@@ -31,18 +36,34 @@ export default function VaultClient() {
     });
   }, [passwords, search, activeTab]);
 
-  const handleAdd = (entry: Omit<PasswordEntry, "id" | "createdAt">) => {
-    const newEntry: PasswordEntry = {
-      ...entry,
-      id: crypto.randomUUID(),
-      createdAt: new Date(),
-    };
-    setPasswords((prev) => [newEntry, ...prev]);
-    setShowModal(false);
+  const handleSave = (data: Omit<PasswordEntry, "id" | "createdAt">) => {
+    if (formEntry && formEntry !== "new") {
+      // โหมดแก้ไข: อัปเดตรายการเดิม โดยคง id / createdAt / sharedWith ไว้
+      setPasswords((prev) =>
+        prev.map((p) =>
+          p.id === formEntry.id ? { ...p, ...data, sharedWith: p.sharedWith } : p
+        )
+      );
+    } else {
+      // โหมดเพิ่มใหม่
+      const newEntry: PasswordEntry = {
+        ...data,
+        id: crypto.randomUUID(),
+        createdAt: new Date(),
+      };
+      setPasswords((prev) => [newEntry, ...prev]);
+    }
+    setFormEntry(null);
   };
 
   const handleDelete = (id: string) => {
     setPasswords((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const handleShareSave = (id: string, memberIds: string[]) => {
+    setPasswords((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, sharedWith: memberIds } : p))
+    );
   };
 
   return (
@@ -63,7 +84,7 @@ export default function VaultClient() {
             />
           </div>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => setFormEntry("new")}
             className="btn-primary flex items-center justify-center gap-2 px-5 py-2.5 text-sm"
           >
             <Plus className="w-4 h-4" />
@@ -96,6 +117,8 @@ export default function VaultClient() {
                 key={entry.id}
                 entry={entry}
                 onDelete={handleDelete}
+                onEdit={(e) => setFormEntry(e)}
+                onShare={(e) => setShareEntry(e)}
               />
             ))
           )}
@@ -109,11 +132,21 @@ export default function VaultClient() {
         )}
       </main>
 
-      {/* Modal */}
-      {showModal && (
-        <AddPasswordModal
-          onClose={() => setShowModal(false)}
-          onAdd={handleAdd}
+      {/* Add / Edit Modal */}
+      {formEntry && (
+        <PasswordFormModal
+          entry={formEntry === "new" ? undefined : formEntry}
+          onClose={() => setFormEntry(null)}
+          onSave={handleSave}
+        />
+      )}
+
+      {/* Share Modal */}
+      {shareEntry && (
+        <ShareModal
+          entry={shareEntry}
+          onClose={() => setShareEntry(null)}
+          onSave={handleShareSave}
         />
       )}
     </>
