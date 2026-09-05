@@ -29,8 +29,8 @@ export default function RegisterForm() {
       setError("ชื่อผู้ใช้ต้องมี 3-20 ตัวอักษร (a-z, 0-9, _ หรือ .)");
       return;
     }
-    if (password.length < 6) {
-      setError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+    if (password.length < 8) {
+      setError("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร");
       return;
     }
     if (password !== confirmPassword) {
@@ -43,10 +43,23 @@ export default function RegisterForm() {
     }
 
     setLoading(true);
-    // จำลอง auth — ตรงนี้ต่อ API จริงได้เลย
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    router.push("/vault");
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, username, masterPassword: password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "สมัครสมาชิกไม่สำเร็จ");
+        setLoading(false);
+        return;
+      }
+      router.push("/vault");
+    } catch {
+      setError("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่");
+      setLoading(false);
+    }
   };
 
   return (

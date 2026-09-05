@@ -1,10 +1,29 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, LogOut } from "lucide-react";
 
+interface CurrentUser {
+  email: string;
+  username: string;
+}
+
 export default function VaultHeader() {
   const router = useRouter();
+  const [user, setUser] = useState<CurrentUser | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => setUser(data.user))
+      .catch(() => setUser(null));
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  };
 
   return (
     <nav className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-20">
@@ -26,17 +45,21 @@ export default function VaultHeader() {
         {/* User */}
         <div className="flex items-center gap-3">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shadow"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white shadow"
             style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)" }}
           >
-            K
+            <ShieldCheck className="w-4 h-4" />
           </div>
           <div className="hidden sm:block text-sm">
-            <p className="font-medium text-gray-800 leading-none">bubu</p>
-            <p className="text-xs text-gray-400 mt-0.5">bubu@kmitl.ac.th</p>
+            <p className="font-medium text-gray-800 leading-none">
+              {user?.username ?? "..."}
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {user?.email ?? ""}
+            </p>
           </div>
           <button
-            onClick={() => router.push("/login")}
+            onClick={handleLogout}
             className="ml-1 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 transition-all"
           >
             <LogOut className="w-3.5 h-3.5" />

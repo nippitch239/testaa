@@ -1,23 +1,41 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, Plus } from "lucide-react";
-import { PasswordEntry, SAMPLE_PASSWORDS } from "@/lib/types";
+import { PasswordEntry } from "@/lib/types";
 import VaultStats from "./VaultStats";
 import CategoryTabs from "./CategoryTabs";
 import PasswordCard from "./PasswordCard";
 import PasswordFormModal from "./PasswordFormModal";
 import ShareModal from "./ShareModal";
 
+// Server returns createdAt as an ISO string; PasswordEntry wants a Date.
+type ApiEntry = Omit<PasswordEntry, "createdAt"> & { createdAt: string };
+
 export default function VaultClient() {
-  const [passwords, setPasswords] = useState<PasswordEntry[]>(SAMPLE_PASSWORDS);
+  const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
   // โหมดฟอร์ม: ปิด / เพิ่มใหม่ / แก้ไข (เก็บ entry ที่กำลังแก้)
   const [formEntry, setFormEntry] = useState<PasswordEntry | "new" | null>(null);
-  // entry ที่กำลังเปิดหน้าต่างแชร์อยู่
+  // entry ที่กำลังเปิดหน้าต่างแชร์อยู่ (การแชร์ยังเก็บแค่ฝั่ง client ตอนนี้)
   const [shareEntry, setShareEntry] = useState<PasswordEntry | null>(null);
+
+  useEffect(() => {
+    fetch("/api/vault")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("failed");
+        const data: { entries: ApiEntry[] } = await res.json();
+        setPasswords(
+          data.entries.map((e) => ({ ...e, createdAt: new Date(e.createdAt) }))
+        );
+      })
+      .catch(() => setError("โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้า"))
+      .finally(() => setLoading(false));
+  }, []);
 
   const categories = useMemo(
     () => ["all", ...Array.from(new Set(passwords.map((p) => p.category)))],
@@ -36,28 +54,54 @@ export default function VaultClient() {
     });
   }, [passwords, search, activeTab]);
 
-  const handleSave = (data: Omit<PasswordEntry, "id" | "createdAt">) => {
-    if (formEntry && formEntry !== "new") {
-      // โหมดแก้ไข: อัปเดตรายการเดิม โดยคง id / createdAt / sharedWith ไว้
-      setPasswords((prev) =>
-        prev.map((p) =>
-          p.id === formEntry.id ? { ...p, ...data, sharedWith: p.sharedWith } : p
-        )
-      );
-    } else {
-      // โหมดเพิ่มใหม่
-      const newEntry: PasswordEntry = {
-        ...data,
-        id: crypto.randomUUID(),
-        createdAt: new Date(),
-      };
-      setPasswords((prev) => [newEntry, ...prev]);
+  const handleSave = async (data: Omit<PasswordEntry, "id" | "createdAt">) => {
+    try {
+      if (formEntry && formEntry !== "new") {
+        // โหมดแก้ไข
+        const res = await fetch(`/api/vault/${formEntry.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("failed");
+        const { entry }: { entry: ApiEntry } = await res.json();
+        setPasswords((prev) =>
+          prev.map((p) =>
+            p.id === formEntry.id
+              ? { ...entry, createdAt: new Date(entry.createdAt), sharedWith: p.sharedWith }
+              : p
+          )
+        );
+      } else {
+        // โหมดเพิ่มใหม่
+        const res = await fetch("/api/vault", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("failed");
+        const { entry }: { entry: ApiEntry } = await res.json();
+        setPasswords((prev) => [
+          { ...entry, createdAt: new Date(entry.createdAt) },
+          ...prev,
+        ]);
+      }
+      setFormEntry(null);
+    } catch {
+      setError("บันทึกไม่สำเร็จ กรุณาลองใหม่");
     }
-    setFormEntry(null);
   };
 
-  const handleDelete = (id: string) => {
-    setPasswords((prev) => prev.filter((p) => p.id !== id));
+  const handleDelete = async (id: string) => {
+    const prev = passwords;
+    setPasswords((p) => p.filter((entry) => entry.id !== id)); // optimistic
+    try {
+      const res = await fetch(`/api/vault/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("failed");
+    } catch {
+      setPasswords(prev); // roll back
+      setError("ลบไม่สำเร็จ กรุณาลองใหม่");
+    }
   };
 
   const handleShareSave = (id: string, memberIds: string[]) => {
@@ -69,6 +113,17 @@ export default function VaultClient() {
   return (
     <>
       <main className="max-w-5xl mx-auto px-6 py-8">
+        {error && (
+          <div className="mb-4 flex items-center gap-2 text-red-600 text-sm bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">
+            <span>⚠️</span>
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+        ) : (
+          <>
         {/* Stats */}
         <VaultStats passwords={passwords} />
 
@@ -129,6 +184,8 @@ export default function VaultClient() {
           <p className="text-center text-xs text-gray-400 mt-6">
             แสดง {filtered.length} จาก {passwords.length} รายการ
           </p>
+        )}
+          </>
         )}
       </main>
 

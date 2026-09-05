@@ -89,7 +89,7 @@ export default function PasswordCard({ entry, onDelete, onEdit, onShare }: Props
       <div className="flex items-center gap-1 flex-shrink-0">
         {/* Visit */}
         <a
-          href={`https://${entry.url}`}
+          href={/^https?:\/\//i.test(entry.url) ? entry.url : `https://${entry.url}`}
           target="_blank"
           rel="noopener noreferrer"
           className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-violet-600 transition-colors"

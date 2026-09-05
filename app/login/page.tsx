@@ -26,12 +26,25 @@ export default function LoginForm() {
     }
 
     setLoading(true);
-    // จำลอง auth — ตรงนี้ต่อ API จริงได้เลย
-    // identifier อาจเป็นอีเมล (มี "@") หรือชื่อผู้ใช้ก็ได้ ฝั่ง backend
-    // แค่ตรวจสอบรูปแบบแล้วค้นหาผู้ใช้จากคอลัมน์ที่ตรงกัน
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    router.push("/vault");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Backend accepts either an email or a username in the same field
+        // (see lib/repo.ts findUserByIdentifier).
+        body: JSON.stringify({ identifier, masterPassword: password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "เข้าสู่ระบบไม่สำเร็จ");
+        setLoading(false);
+        return;
+      }
+      router.push("/vault");
+    } catch {
+      setError("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่");
+      setLoading(false);
+    }
   };
 
   return (
