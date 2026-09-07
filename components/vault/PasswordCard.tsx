@@ -10,17 +10,29 @@ import {
   ExternalLink,
   Pencil,
   Users,
+  MoreVertical,
+  KeyRound,
 } from "lucide-react";
-import { PasswordEntry, CATEGORY_STYLES, TEAM_MEMBERS } from "@/lib/types";
+import { PasswordEntry, TEAM_MEMBERS, type Category } from "@/lib/types";
 
 interface Props {
   entry: PasswordEntry;
   onDelete: (id: string) => void;
   onEdit: (entry: PasswordEntry) => void;
   onShare: (entry: PasswordEntry) => void;
+  view?: "rows" | "cards" | "featured";
 }
 
-export default function PasswordCard({ entry, onDelete, onEdit, onShare }: Props) {
+const FEATURE_BACKGROUNDS: Record<Category, string> = {
+  Development: "linear-gradient(145deg, #24375b 0%, #171b2b 50%, #12141a 100%)",
+  Email: "linear-gradient(145deg, #493069 0%, #241b38 52%, #13141a 100%)",
+  Entertainment: "linear-gradient(145deg, #633159 0%, #2e1b2a 52%, #14151b 100%)",
+  Finance: "linear-gradient(145deg, #63522c 0%, #30291d 52%, #15161a 100%)",
+  Social: "linear-gradient(145deg, #31524d 0%, #1b2d2b 52%, #13151a 100%)",
+  Other: "linear-gradient(145deg, #3c3f49 0%, #23252c 52%, #14151a 100%)",
+};
+
+export default function PasswordCard({ entry, onDelete, onEdit, onShare, view = "rows" }: Props) {
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -28,141 +40,110 @@ export default function PasswordCard({ entry, onDelete, onEdit, onShare }: Props
     try {
       await navigator.clipboard.writeText(entry.password);
     } catch {
-      // fallback
+      // Clipboard access may be unavailable in some browsers.
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const destination = /^https?:\/\//i.test(entry.url) ? entry.url : `https://${entry.url}`;
   const initial = entry.site.charAt(0).toUpperCase();
   const sharedMembers = (entry.sharedWith ?? [])
-    .map((id) => TEAM_MEMBERS.find((m) => m.id === id))
-    .filter((m): m is (typeof TEAM_MEMBERS)[number] => !!m);
+    .map((id) => TEAM_MEMBERS.find((member) => member.id === id))
+    .filter((member): member is (typeof TEAM_MEMBERS)[number] => Boolean(member));
+
+  const actionMenu = (
+    <details className="relative">
+      <summary className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-md text-[#858994] hover:bg-[#2B2E36] hover:text-white [&::-webkit-details-marker]:hidden" aria-label={`เมนู ${entry.site}`}>
+        <MoreVertical className="h-4 w-4" />
+      </summary>
+      <div className="absolute right-0 top-9 z-30 w-44 overflow-hidden rounded-lg border border-[#343741] bg-[#202228] py-1 shadow-2xl">
+        <a href={destination} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 text-sm text-[#C5C7CE] hover:bg-[#2A2D35] hover:text-white">
+          <ExternalLink className="h-4 w-4" /> เปิดเว็บไซต์
+        </a>
+        <button type="button" onClick={() => setVisible((current) => !current)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#C5C7CE] hover:bg-[#2A2D35] hover:text-white">
+          {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />} {visible ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+        </button>
+        <button type="button" onClick={handleCopy} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#C5C7CE] hover:bg-[#2A2D35] hover:text-white">
+          {copied ? <Check className="h-4 w-4 text-[#49C68A]" /> : <Copy className="h-4 w-4" />} {copied ? "คัดลอกแล้ว" : "คัดลอกรหัสผ่าน"}
+        </button>
+        <button type="button" onClick={() => onShare(entry)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#C5C7CE] hover:bg-[#2A2D35] hover:text-white">
+          <Users className="h-4 w-4" /> แชร์ภายในทีม
+        </button>
+        <button type="button" onClick={() => onEdit(entry)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#C5C7CE] hover:bg-[#2A2D35] hover:text-white">
+          <Pencil className="h-4 w-4" /> แก้ไข
+        </button>
+        <button type="button" onClick={() => onDelete(entry.id)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#FF858F] hover:bg-[#342329]">
+          <Trash2 className="h-4 w-4" /> ลบ
+        </button>
+      </div>
+    </details>
+  );
+
+  if (view === "featured") {
+    return (
+      <article className="group relative h-44 w-[224px] shrink-0 snap-start overflow-hidden rounded-lg border border-white/5 p-4 transition duration-200 hover:-translate-y-1 hover:border-white/15 hover:shadow-xl sm:w-[240px]" style={{ background: FEATURE_BACKGROUNDS[entry.category] }}>
+        <KeyRound className="absolute -right-5 -top-4 h-28 w-28 rotate-12 text-white/[.055] transition-transform duration-200 group-hover:scale-105" />
+        <div className="relative flex h-full flex-col">
+          <div className="flex items-start justify-between">
+            <span className="rounded-md border border-white/10 bg-black/20 px-2 py-1 text-xs text-white/70">{entry.category}</span>
+            <button type="button" onClick={() => onEdit(entry)} className="rounded-md p-1.5 text-white/60 hover:bg-black/20 hover:text-white" aria-label={`แก้ไข ${entry.site}`}>
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div className="mt-auto min-w-0">
+            <p className="truncate text-base font-medium text-white">{entry.site}</p>
+            <p className="mt-2 truncate text-xs text-white/60">{entry.username}</p>
+            <p className="mt-1 font-mono text-xs tracking-widest text-white/55">••••••••••</p>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  if (view === "cards") {
+    return (
+      <article className="rounded-lg border border-[#2A2D35] bg-[#202228] p-4 transition duration-200 hover:border-[#3A3D48]">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2D3050] text-sm font-semibold text-[#B8B4FF]">{initial}</div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-[#F0F1F3]">{entry.site}</p>
+            <p className="mt-1 truncate text-xs text-[#777B85]">{entry.url}</p>
+          </div>
+          {actionMenu}
+        </div>
+        <div className="mt-4 grid gap-3 border-t border-[#2A2D35] pt-4 text-xs sm:grid-cols-2">
+          <div><p className="text-[#696D77]">ชื่อผู้ใช้</p><p className="mt-1 truncate text-[#C8CAD0]">{entry.username}</p></div>
+          <div><p className="text-[#696D77]">รหัสผ่าน</p><p className="mt-1 truncate font-mono text-[#C8CAD0]">{visible ? entry.password : "••••••••••"}</p></div>
+        </div>
+      </article>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4 card-hover group">
-      {/* Avatar */}
-      <div
-        className="w-11 h-11 rounded-xl flex items-center justify-center text-violet-600 font-bold text-lg flex-shrink-0 select-none"
-        style={{ background: "linear-gradient(135deg, #ede9fe, #f3e8ff)" }}
-      >
-        {initial}
+    <article className="grid grid-cols-[40px_minmax(0,1fr)_auto] gap-x-3 gap-y-2 border-b border-[#292B33] bg-[#202228] px-4 py-3 transition duration-150 last:border-b-0 hover:bg-[#23252C] lg:grid-cols-[44px_minmax(140px,1fr)_120px_minmax(160px,1.2fr)_150px_44px] lg:items-center">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2D3050] text-xs font-semibold text-[#B8B4FF]">{initial}</div>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-[#ECEDEF]">{entry.site}</p>
+        <p className="mt-0.5 truncate text-xs text-[#6F737D]">{entry.url}</p>
       </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-          <p className="font-semibold text-gray-900 text-sm">{entry.site}</p>
-          <span
-            className={`text-xs px-2 py-0.5 rounded-full font-medium border ${
-              CATEGORY_STYLES[entry.category]
-            }`}
-          >
-            {entry.category}
-          </span>
-          {sharedMembers.length > 0 && (
-            <span className="flex items-center -space-x-1.5">
-              {sharedMembers.slice(0, 3).map((m) => (
-                <span
-                  key={m.id}
-                  title={m.name}
-                  className={`w-5 h-5 rounded-full bg-gradient-to-br ${m.color} border-2 border-white flex items-center justify-center text-[9px] font-bold text-white`}
-                >
-                  {m.name.charAt(0).toUpperCase()}
-                </span>
-              ))}
-              {sharedMembers.length > 3 && (
-                <span className="w-5 h-5 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[9px] font-bold text-gray-600">
-                  +{sharedMembers.length - 3}
-                </span>
-              )}
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-gray-500 truncate">{entry.username}</p>
-        <p className="text-xs font-mono text-gray-700 mt-0.5 tracking-wider">
-          {visible ? entry.password : "•".repeat(Math.min(entry.password.length, 16))}
-        </p>
+      <div className="col-start-2 row-start-2 lg:col-auto lg:row-auto">
+        <span className="inline-flex rounded-md bg-[#282B33] px-2 py-1 text-xs text-[#B4B7C0]">{entry.category}</span>
       </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-1 flex-shrink-0">
-        {/* Visit */}
-        <a
-          href={/^https?:\/\//i.test(entry.url) ? entry.url : `https://${entry.url}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-violet-600 transition-colors"
-          title="เปิดเว็บไซต์"
-        >
-          <ExternalLink className="w-4 h-4" />
-        </a>
-
-        {/* Show/Hide */}
-        <button
-          onClick={() => setVisible(!visible)}
-          className={`p-2 rounded-lg transition-colors ${
-            visible
-              ? "bg-violet-100 text-violet-600"
-              : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-          }`}
-          title="แสดง/ซ่อนรหัสผ่าน"
-        >
-          {visible ? (
-            <EyeOff className="w-4 h-4" />
-          ) : (
-            <Eye className="w-4 h-4" />
-          )}
+      <div className="col-start-2 min-w-0 lg:col-auto">
+        <p className="truncate text-xs text-[#BABDC5]">{entry.username}</p>
+        {sharedMembers.length > 0 && <p className="mt-1 text-[11px] text-[#777B85]">แชร์กับ {sharedMembers.length} คน</p>}
+      </div>
+      <div className="col-start-2 flex min-w-0 items-center gap-2 lg:col-auto">
+        <span className="truncate font-mono text-xs tracking-wider text-[#BFC2C9]">{visible ? entry.password : "••••••••••"}</span>
+        <button type="button" onClick={() => setVisible((current) => !current)} className="rounded p-1 text-[#70747E] hover:bg-[#30333C] hover:text-white" aria-label={visible ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}>
+          {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
         </button>
-
-        {/* Copy */}
-        <button
-          onClick={handleCopy}
-          className={`p-2 rounded-lg transition-colors ${
-            copied
-              ? "bg-green-100 text-green-600"
-              : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-          }`}
-          title="คัดลอกรหัสผ่าน"
-        >
-          {copied ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Copy className="w-4 h-4" />
-          )}
-        </button>
-
-        {/* Share */}
-        <button
-          onClick={() => onShare(entry)}
-          className={`p-2 rounded-lg transition-colors ${
-            sharedMembers.length > 0
-              ? "bg-blue-100 text-blue-600"
-              : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-          }`}
-          title="แชร์ภายในทีม"
-        >
-          <Users className="w-4 h-4" />
-        </button>
-
-        {/* Edit */}
-        <button
-          onClick={() => onEdit(entry)}
-          className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-violet-600 transition-colors"
-          title="แก้ไข"
-        >
-          <Pencil className="w-4 h-4" />
-        </button>
-
-        {/* Delete */}
-        <button
-          onClick={() => onDelete(entry.id)}
-          className="p-2 rounded-lg text-gray-200 hover:bg-red-50 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-          title="ลบ"
-        >
-          <Trash2 className="w-4 h-4" />
+        <button type="button" onClick={handleCopy} className="rounded p-1 text-[#70747E] hover:bg-[#30333C] hover:text-white" aria-label="คัดลอกรหัสผ่าน">
+          {copied ? <Check className="h-3.5 w-3.5 text-[#49C68A]" /> : <Copy className="h-3.5 w-3.5" />}
         </button>
       </div>
-    </div>
+      <div className="col-start-3 row-start-1 lg:col-auto lg:row-auto">{actionMenu}</div>
+    </article>
   );
 }

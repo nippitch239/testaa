@@ -1,10 +1,8 @@
-import VaultHeader    from "@/components/vault/VaultHeader";
 import VaultClient    from "@/components/vault/VaultClient";
 
 export default function VaultPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <VaultHeader />
+    <div className="min-h-screen bg-[#090B12] text-[#F2F3F5]">
       <VaultClient />
     </div>
   );

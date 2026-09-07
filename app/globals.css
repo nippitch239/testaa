@@ -1,13 +1,13 @@
-@import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 /* ── Theme tokens ── */
 @theme {
-  --font-sans: "Sarabun", "IBM Plex Sans Thai", "Noto Sans Thai", sans-serif;
+  --font-sans: "Inter", "Sarabun", "IBM Plex Sans Thai", "Noto Sans Thai", sans-serif;
 
-  --color-primary:       #7c3aed;
-  --color-primary-light: #a855f7;
-  --color-primary-dark:  #6d28d9;
+  --color-primary:       #554cff;
+  --color-primary-light: #7770ff;
+  --color-primary-dark:  #4037d8;
 
   --radius-xl:  0.75rem;
   --radius-2xl: 1rem;
@@ -22,6 +22,8 @@
 
   body {
     font-family: var(--font-sans);
+    background: #090b12;
+    color: #f2f3f5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -29,24 +31,19 @@
 
 /* ── Custom Utilities (v4 style) ── */
 @utility vault-gradient {
-  background: linear-gradient(
-    135deg,
-    #3b0764 0%,
-    #6d28d9 40%,
-    #7c3aed 70%,
-    #a855f7 100%
-  );
+  background: #17191f;
 }
 
 @utility btn-primary {
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: #554cff;
   color: white;
   font-weight: 600;
   border-radius: 0.75rem;
   transition: all 0.15s ease;
 
   &:hover {
-    box-shadow: 0 8px 25px -5px rgb(124 58 237 / 0.4);
+    background: #675fff;
+    box-shadow: 0 8px 25px -5px rgb(85 76 255 / 0.28);
   }
   &:active {
     transform: scale(0.97);
@@ -61,16 +58,17 @@
   width: 100%;
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #343741;
   font-size: 0.875rem;
   outline: none;
   transition: all 0.15s ease;
-  background-color: #f9fafb;
+  color: #f2f3f5;
+  background-color: #202228;
 
   &:focus {
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgb(139 92 246 / 0.1);
-    background-color: white;
+    border-color: #625aff;
+    box-shadow: 0 0 0 3px rgb(85 76 255 / 0.14);
+    background-color: #24262d;
   }
 }
 
@@ -78,27 +76,47 @@
   transition: all 0.2s ease;
 
   &:hover {
-    box-shadow: 0 4px 20px -4px rgb(0 0 0 / 0.1);
-    transform: translateY(-1px);
+    border-color: #355d4c;
   }
 }
 
 @utility scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: #ddd6fe transparent;
+  scrollbar-color: #3b3e48 transparent;
 
   &::-webkit-scrollbar {
     width: 4px;
   }
   &::-webkit-scrollbar-thumb {
-    background: #ddd6fe;
+    background: #3b3e48;
     border-radius: 9999px;
   }
 }
 
 @utility gradient-text {
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: linear-gradient(135deg, #7770ff, #9d98ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+button, a, input, select {
+  outline-offset: 2px;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid #7770ff;
+}
+
+::selection {
+  background: rgb(85 76 255 / 0.38);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

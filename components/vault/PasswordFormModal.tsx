@@ -55,30 +55,28 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-200">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="password-form-title">
+      <div className="bg-[#202228] text-[#F2F3F5] border border-[#343741] rounded-xl shadow-2xl w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto scrollbar-thin animate-in fade-in slide-in-from-bottom-4 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#343741]">
           <div className="flex items-center gap-3">
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{
-                background: "linear-gradient(135deg, #7c3aed, #a855f7)",
-              }}
+              className="w-8 h-8 rounded-md flex items-center justify-center bg-[#2D3050] border border-[#44487A]"
             >
               {isEditMode ? (
-                <Save className="w-4 h-4 text-white" />
+                <Save className="w-4 h-4 text-[#B8B4FF]" />
               ) : (
-                <Plus className="w-4 h-4 text-white" />
+                <Plus className="w-4 h-4 text-[#B8B4FF]" />
               )}
             </div>
-            <h2 className="font-bold text-gray-900">
+            <h2 id="password-form-title" className="font-semibold text-[#F2F3F5]">
               {isEditMode ? "แก้ไขรหัสผ่าน" : "เพิ่มรหัสผ่านใหม่"}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="p-1.5 rounded-md text-[#777B85] hover:bg-[#2A2D35] hover:text-white transition-colors"
+            aria-label="ปิดหน้าต่าง"
           >
             <X className="w-4 h-4" />
           </button>
@@ -88,7 +86,7 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Site */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">
+            <label className="block text-sm font-medium text-[#B8BBC3] mb-1.5">
               ชื่อเว็บไซต์ <span className="text-red-400">*</span>
             </label>
             <input
@@ -104,7 +102,7 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
 
           {/* URL */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">
+            <label className="block text-sm font-medium text-[#B8BBC3] mb-1.5">
               URL
             </label>
             <input
@@ -117,7 +115,7 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
 
           {/* Username */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">
+            <label className="block text-sm font-medium text-[#B8BBC3] mb-1.5">
               อีเมล / ชื่อผู้ใช้ <span className="text-red-400">*</span>
             </label>
             <input
@@ -133,7 +131,7 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
 
           {/* Password */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">
+            <label className="block text-sm font-medium text-[#B8BBC3] mb-1.5">
               รหัสผ่าน <span className="text-red-400">*</span>
             </label>
             <div className="relative">
@@ -148,7 +146,7 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
                 <button
                   type="button"
                   onClick={() => set("password", generatePassword())}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+                  className="p-1.5 rounded-md text-[#777B85] hover:text-[#B8B4FF] hover:bg-[#2A2D35] transition-colors"
                   title="สุ่มรหัสผ่านอัตโนมัติ"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
@@ -156,7 +154,8 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+                  className="p-1.5 rounded-md text-[#777B85] hover:text-[#B8B4FF] hover:bg-[#2A2D35] transition-colors"
+                  aria-label={showPw ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
                 >
                   {showPw ? (
                     <EyeOff className="w-3.5 h-3.5" />
@@ -193,7 +192,7 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
                             : strength === 2
                             ? "bg-orange-400"
                             : "bg-red-400"
-                          : "bg-gray-100"
+                          : "bg-[#343741]"
                       }`}
                     />
                   );
@@ -204,7 +203,7 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
 
           {/* Category */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">
+            <label className="block text-sm font-medium text-[#B8BBC3] mb-1.5">
               หมวดหมู่
             </label>
             <select
@@ -225,16 +224,13 @@ export default function PasswordFormModal({ onClose, onSave, entry }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl border border-gray-200 text-sm text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+              className="flex-1 py-3 rounded-md border border-[#3A3D48] text-sm text-[#B8BBC3] font-medium hover:bg-[#2A2D35] transition-colors"
             >
               ยกเลิก
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 rounded-xl text-white text-sm font-semibold transition-all active:scale-95"
-              style={{
-                background: "linear-gradient(135deg, #7c3aed, #a855f7)",
-              }}
+              className="btn-primary flex-1 py-3 rounded-md text-sm font-semibold transition-all active:scale-95"
             >
               {isEditMode ? "บันทึกการแก้ไข" : "บันทึก"}
             </button>

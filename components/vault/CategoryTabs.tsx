@@ -1,16 +1,17 @@
 "use client";
 
-import { Category, CATEGORY_STYLES } from "@/lib/types";
+import { KeyRound } from "lucide-react";
 
 interface Props {
   categories: string[];
   active: string;
+  counts: Record<string, number>;
   onChange: (cat: string) => void;
 }
 
-export default function CategoryTabs({ categories, active, onChange }: Props) {
+export default function CategoryTabs({ categories, counts, active, onChange }: Props) {
   return (
-    <div className="flex gap-2 flex-wrap mb-5">
+    <div className="flex flex-col gap-1" role="listbox" aria-label="หมวดหมู่รหัสผ่าน">
       {categories.map((cat) => {
         const isAll = cat === "all";
         const isActive = active === cat;
@@ -18,21 +19,17 @@ export default function CategoryTabs({ categories, active, onChange }: Props) {
           <button
             key={cat}
             onClick={() => onChange(cat)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+            role="option"
+            aria-selected={isActive}
+            className={`flex h-9 items-center gap-2 rounded-lg px-3 text-sm transition-colors ${
               isActive
-                ? "text-white border-transparent shadow-md"
-                : "bg-white text-gray-500 border-gray-200 hover:border-violet-300 hover:text-violet-600"
+                ? "bg-[#282A33] text-[#F0F1F3]"
+                : "text-[#92959F] hover:bg-[#23252C] hover:text-[#D5D7DC]"
             }`}
-            style={
-              isActive
-                ? {
-                    background:
-                      "linear-gradient(135deg, #7c3aed, #a855f7)",
-                  }
-                : {}
-            }
           >
-            {isAll ? "🗂 ทั้งหมด" : cat}
+            <KeyRound className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-[#8D86FF]" : "text-[#646873]"}`} />
+            <span className="truncate">{isAll ? "รหัสผ่านทั้งหมด" : cat}</span>
+            <span className={`ml-auto min-w-6 rounded-md px-1.5 py-0.5 text-center text-[11px] tabular-nums ${isActive ? "bg-[#373A45] text-[#C9CBD1]" : "bg-[#23252C] text-[#737782]"}`}>{counts[cat] ?? 0}</span>
           </button>
         );
       })}

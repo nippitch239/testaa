@@ -25,27 +25,27 @@ export default function ShareModal({ entry, onClose, onSave }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-200">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="share-title">
+      <div className="bg-[#202228] text-[#F2F3F5] border border-[#343741] rounded-xl shadow-2xl w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#343741]">
           <div className="flex items-center gap-3">
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)" }}
+              className="w-8 h-8 rounded-md flex items-center justify-center bg-[#2D3050] border border-[#44487A]"
             >
-              <Users className="w-4 h-4 text-white" />
+              <Users className="w-4 h-4 text-[#B8B4FF]" />
             </div>
             <div>
-              <h2 className="font-bold text-gray-900 leading-none">
+              <h2 id="share-title" className="font-semibold text-[#F2F3F5] leading-none">
                 แชร์ภายในทีม
               </h2>
-              <p className="text-xs text-gray-400 mt-1">{entry.site}</p>
+              <p className="text-xs text-[#777B85] mt-1">{entry.site}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="p-1.5 rounded-md text-[#777B85] hover:bg-[#2A2D35] hover:text-white transition-colors"
+            aria-label="ปิดหน้าต่าง"
           >
             <X className="w-4 h-4" />
           </button>
@@ -53,7 +53,7 @@ export default function ShareModal({ entry, onClose, onSave }: Props) {
 
         {/* Member list */}
         <div className="p-6 space-y-2 max-h-80 overflow-y-auto scrollbar-thin">
-          <p className="text-xs text-gray-500 mb-2">
+          <p className="text-sm text-[#A8ABB4] mb-2">
             เลือกสมาชิกในทีมที่จะให้เข้าถึงรหัสผ่านนี้ได้อย่างปลอดภัย
           </p>
           {TEAM_MEMBERS.map((member) => {
@@ -65,8 +65,8 @@ export default function ShareModal({ entry, onClose, onSave }: Props) {
                 onClick={() => toggle(member.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-colors text-left ${
                   isSelected
-                    ? "border-violet-300 bg-violet-50"
-                    : "border-gray-100 hover:bg-gray-50"
+                    ? "border-[#625AFF] bg-[#2D2A50]"
+                    : "border-[#343741] hover:bg-[#262830]"
                 }`}
               >
                 <div
@@ -75,16 +75,16 @@ export default function ShareModal({ entry, onClose, onSave }: Props) {
                   {member.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-[#F2F3F5] truncate">
                     {member.name}
                   </p>
-                  <p className="text-xs text-gray-400 truncate">{member.email}</p>
+                  <p className="text-xs text-[#777B85] truncate">{member.email}</p>
                 </div>
                 <div
                   className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 border transition-colors ${
                     isSelected
-                      ? "bg-violet-600 border-violet-600"
-                      : "border-gray-300"
+                      ? "bg-[#554CFF] border-[#554CFF]"
+                      : "border-[#4A4D58]"
                   }`}
                 >
                   {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
@@ -99,15 +99,14 @@ export default function ShareModal({ entry, onClose, onSave }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-3 rounded-xl border border-gray-200 text-sm text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 py-3 rounded-md border border-[#3A3D48] text-sm text-[#B8BBC3] font-medium hover:bg-[#2A2D35] transition-colors"
           >
             ยกเลิก
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 py-3 rounded-xl text-white text-sm font-semibold transition-all active:scale-95"
-            style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)" }}
+            className="btn-primary flex-1 py-3 rounded-md text-sm font-semibold transition-all active:scale-95"
           >
             บันทึกการแชร์
           </button>
